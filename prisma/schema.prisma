@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model comentarios {
+  id         Int       @id @default(autoincrement())
+  postid     Int?
+  comentario String?   @db.Text
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+  posts      posts?    @relation(fields: [postid], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "comentarios_ibfk_1")
+
+  @@index([postid], map: "postid")
+}
+
+model pessoas {
+  id             Int           @id @default(autoincrement())
+  nome           String        @db.VarChar(100)
+  email          String        @db.VarChar(100)
+  documento      String?       @db.VarChar(20)
+  tipo           pessoas_tipo?
+  dataNascimento DateTime?     @db.Date
+  created_at     DateTime      @default(now()) @db.Timestamp(0)
+  updated_at     DateTime      @default(now()) @db.Timestamp(0)
+  deleted_at     DateTime?     @db.Timestamp(0)
+  posts          posts[]
+}
+
+model posts {
+  id          Int           @id @default(autoincrement())
+  titulo      String        @db.VarChar(255)
+  conteudo    String?       @db.Text
+  imagem      String?       @db.VarChar(255)
+  authorid    Int?
+  created_at  DateTime      @default(now()) @db.Timestamp(0)
+  updated_at  DateTime      @default(now()) @db.Timestamp(0)
+  deleted_at  DateTime?     @db.Timestamp(0)
+  comentarios comentarios[]
+  pessoas     pessoas?      @relation(fields: [authorid], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "posts_ibfk_1")
+  rating      rating[]
+
+  @@index([authorid], map: "authorid")
+}
+
+model rating {
+  id         Int       @id @default(autoincrement())
+  postid     Int?
+  nota       Decimal?  @db.Decimal(3, 1)
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+  posts      posts?    @relation(fields: [postid], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "rating_ibfk_1")
+
+  @@index([postid], map: "postid")
+}
+
+enum pessoas_tipo {
+  fisica
+  juridica
+}
